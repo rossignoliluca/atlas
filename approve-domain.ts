@@ -1,25 +1,29 @@
 /**
- * Approve and Integrate SEMI_AUTONOMOUS Domain
+ * Approve and Integrate Domains via CLI
+ *
+ * Usage: npx ts-node approve-domain.ts [DOMAIN_NAME]
+ * Example: npx ts-node approve-domain.ts SOCIOTECHNICAL
  */
 
 import { SelfProductionEngine } from './src/self-production';
-import { Entity } from './src/core/types';
 import { CATALOG } from './src/catalog';
 
-async function approveSemiAutonomous() {
+const targetDomain = process.argv[2] || 'SOCIOTECHNICAL';
+
+async function approveDomain() {
   console.log('╔════════════════════════════════════════════════════════════════╗');
-  console.log('║     APPROVING SEMI_AUTONOMOUS DOMAIN                           ║');
+  console.log(`║     APPROVING ${targetDomain.padEnd(43)}║`);
   console.log('╚════════════════════════════════════════════════════════════════╝\n');
 
   // Create engine (NOT dry run - we want to actually write files)
   const engine = new SelfProductionEngine({
-    dryRun: false,  // Actually write files!
+    dryRun: false,
     enableGeneration: true,
     requireApproval: true,
     minValidationScore: 0.6,
   });
 
-  // First, run a cycle to populate the review queue
+  // Run a cycle to populate the review queue
   console.log('Running cycle to detect gaps and generate code...\n');
   await engine.runCycle(CATALOG);
 
@@ -27,44 +31,44 @@ async function approveSemiAutonomous() {
   const pending = engine.getPendingReviews();
   console.log(`\nFound ${pending.length} pending reviews\n`);
 
-  // Find SEMI_AUTONOMOUS domain
-  const semiAutonomous = pending.find(p =>
-    p.generatedCode?.name === 'SEMI_AUTONOMOUS' ||
-    p.generatedCode?.name?.includes('SEMI_AUTONOMOUS')
+  // Find the target domain
+  const targetReview = pending.find(p =>
+    p.generatedCode?.name === targetDomain ||
+    p.generatedCode?.name?.includes(targetDomain)
   );
 
-  if (!semiAutonomous) {
-    console.log('❌ SEMI_AUTONOMOUS not found in pending reviews');
+  if (!targetReview) {
+    console.log(`❌ ${targetDomain} not found in pending reviews`);
     console.log('\nAvailable reviews:');
     for (const p of pending) {
       if (p.generatedCode) {
-        console.log(`  - ${p.id}: ${p.generatedCode.name} (${p.generatedCode.type})`);
+        console.log(`  - ${p.generatedCode.name} (${p.generatedCode.type})`);
       } else {
-        console.log(`  - ${p.id}: ${p.type} - ${p.sourceGap.type}`);
+        console.log(`  - ${p.type}: ${p.sourceGap.type}`);
       }
     }
     return;
   }
 
-  console.log('✓ Found SEMI_AUTONOMOUS domain');
-  console.log(`  Review ID: ${semiAutonomous.id}`);
-  console.log(`  Type: ${semiAutonomous.generatedCode?.type}`);
-  console.log(`  Target: ${semiAutonomous.generatedCode?.targetFile}`);
-  console.log(`  Score: ${semiAutonomous.validation?.score.toFixed(2)}`);
+  console.log(`✓ Found ${targetDomain} domain`);
+  console.log(`  Review ID: ${targetReview.id}`);
+  console.log(`  Type: ${targetReview.generatedCode?.type}`);
+  console.log(`  Target: ${targetReview.generatedCode?.targetFile}`);
+  console.log(`  Score: ${targetReview.validation?.score.toFixed(2)}`);
 
   // Show the code that will be integrated
   console.log('\n📝 Code to integrate:\n');
   console.log('─'.repeat(60));
-  console.log(semiAutonomous.generatedCode?.code);
+  console.log(targetReview.generatedCode?.code);
   console.log('─'.repeat(60));
 
   // Approve it
   console.log('\n🔐 Approving...');
-  await engine.approve(semiAutonomous.id, 'luca', 'Approved via CLI - new cross-cutting domain');
+  await engine.approve(targetReview.id, 'luca', `Approved via CLI - ${targetDomain} domain`);
 
   // Integrate it
   console.log('🔧 Integrating...');
-  const result = await engine.integrateApproved(semiAutonomous.id);
+  const result = await engine.integrateApproved(targetReview.id);
 
   if (result.success) {
     console.log('\n✅ INTEGRATION SUCCESSFUL!');
@@ -82,4 +86,4 @@ async function approveSemiAutonomous() {
   engine.printStatus();
 }
 
-approveSemiAutonomous().catch(console.error);
+approveDomain().catch(console.error);

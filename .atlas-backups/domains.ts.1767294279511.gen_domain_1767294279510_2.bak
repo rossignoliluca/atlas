@@ -247,35 +247,6 @@ export function getDomainPrerequisites(domain: Domain): Domain[] {
 // AUTO-GENERATED DOMAINS BELOW
 
 /**
- * SOCIOTECHNICAL Domain
- *
- * Auto-generated domain for entities with:
- * - closure ~0.34
- * - scope ~0.61
- * - spans 3 domains: SYMBOLIC, COLLECTIVE, ARTIFICIAL
- *
- * Example entities: Language, Story/Narrative, Myth, Artwork, Ritual
- *
- * @generated
- */
-export const DOMAIN_SOCIOTECHNICAL: DomainDefinition = {
-  name: 'SOCIOTECHNICAL',
-  description: 'Entities characterized by: closure ~0.34, scope ~0.61, spans 3 domains: SYMBOLIC, COLLECTIVE, ARTIFICIAL',
-  characteristics: [
-  "closure ~0.34",
-  "scope ~0.61",
-  "spans 3 domains: SYMBOLIC, COLLECTIVE, ARTIFICIAL"
-],
-  typicalClosure: 0.5,
-  typicalScope: 0.5,
-  compatibleStrata: ["MATTER","LIFE","SENTIENCE","LOGOS"],
-};
-
-// Add to DOMAINS array
-// DOMAINS.push(DOMAIN_SOCIOTECHNICAL);
-
-
-/**
  * SEMI_AUTONOMOUS Domain
  *
  * Auto-generated domain for entities with:
