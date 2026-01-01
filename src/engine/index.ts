@@ -8,10 +8,13 @@
 import { Entity, EntityConfiguration } from '../core/types';
 import { IngestPipeline, RawDocument } from '../ingest';
 import { EntityExtractor, RelationExtractor } from '../extraction';
-import { ECFCharacterizer, AxiomValidator } from './characterizer';
+import { ECFCharacterizer, AxiomValidator, LLMConfig } from './characterizer';
 import { KnowledgeGraph } from '../knowledge';
 import { PatternDetector, HypothesisGenerator } from '../production';
 import { ExtensionEngine, ReviewQueue } from '../extension';
+
+// Re-export from characterizer
+export { LLMConfig, ECFCharacterizer, AxiomValidator } from './characterizer';
 
 /**
  * Engine configuration

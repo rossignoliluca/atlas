@@ -154,7 +154,7 @@ export class WikipediaConnector implements SourceConnector {
 
     try {
       const response = await fetch(`${baseUrl}?${params}`);
-      const data = await response.json();
+      const data = await response.json() as { query?: { search?: Array<{ pageid: number; title: string; snippet: string; wordcount: number }> } };
 
       const documents: RawDocument[] = [];
 
@@ -196,7 +196,7 @@ export class WikipediaConnector implements SourceConnector {
 
     try {
       const response = await fetch(`${baseUrl}?${params}`);
-      const data = await response.json();
+      const data = await response.json() as { query?: { pages?: Record<string, { extract?: string }> } };
 
       const pages = data.query?.pages || {};
       const pageId = Object.keys(pages)[0];
@@ -245,7 +245,7 @@ export class WikidataConnector implements SourceConnector {
       const response = await fetch(`${baseUrl}?${params}`, {
         headers: { 'Accept': 'application/json' },
       });
-      const data = await response.json();
+      const data = await response.json() as { results?: { bindings?: Array<{ item?: { value?: string }; itemLabel?: { value?: string }; itemDescription?: { value?: string } }> } };
 
       const documents: RawDocument[] = [];
 
