@@ -359,11 +359,14 @@ export class GapAnalyzer {
       const domains = new Set(cluster.entities.map(e => e.domain));
 
       if (domains.size > 2 && cluster.entities.length >= 5) {
+        // Suggest a new domain if cluster is coherent enough
+        const suggestedDomainName = this.suggestCrossCuttingDomain(cluster, domains);
+
         gaps.push({
           id: this.generateGapId(),
           type: 'clustering_anomaly',
-          severity: 'medium',
-          description: `Cluster of ${cluster.entities.length} entities with similar closure/scope spans ${domains.size} domains`,
+          severity: cluster.entities.length >= 8 ? 'high' : 'medium',
+          description: `Cluster of ${cluster.entities.length} entities with similar closure/scope spans ${domains.size} domains. Suggests cross-cutting category "${suggestedDomainName}".`,
           evidence: cluster.entities.slice(0, 5).map(e => ({
             entityId: e.id,
             entityName: e.name,
@@ -373,14 +376,23 @@ export class GapAnalyzer {
             context: `Domain: ${e.domain}, C: ${e.config.closure.toFixed(2)}, S: ${e.config.scope.toFixed(2)}`,
           })),
           suggestedAction: {
-            type: 'manual_review',
-            description: 'Review whether cluster suggests a cross-cutting category',
+            type: cluster.entities.length >= 8 ? 'new_domain' : 'manual_review',
+            description: cluster.entities.length >= 8
+              ? `Consider creating new domain "${suggestedDomainName}" for this cluster`
+              : 'Review whether cluster suggests a cross-cutting category',
             parameters: {
+              suggestedName: suggestedDomainName,
               avgClosure: cluster.avgClosure,
               avgScope: cluster.avgScope,
               domains: Array.from(domains),
+              characteristics: [
+                `closure ~${cluster.avgClosure.toFixed(2)}`,
+                `scope ~${cluster.avgScope.toFixed(2)}`,
+                `spans ${domains.size} domains: ${Array.from(domains).join(', ')}`,
+              ],
+              exampleEntities: cluster.entities.slice(0, 5).map(e => e.name),
             },
-            confidence: 0.4,
+            confidence: cluster.coherence * 0.8,
           },
           detectedAt: new Date(),
         });
@@ -398,7 +410,43 @@ export class GapAnalyzer {
 
     for (const entity of entities) {
       // A3: Closure-Scope tension
+      // EXCEPTION: IDEAL domain entities (mathematical objects) can have both high C and S
       if (entity.config.closure > 0.8 && entity.config.scope > 0.8) {
+        // Check if this is an IDEAL domain entity - they're special!
+        if (entity.domain === 'IDEAL') {
+          // Mathematical objects genuinely have both high closure AND high scope
+          // This is not a violation but a defining characteristic of IDEAL entities
+          // Suggest documenting this as an A3 exception
+          if (entity.config.closure > 0.9 && entity.config.scope > 0.9) {
+            gaps.push({
+              id: this.generateGapId(),
+              type: 'axiom_tension',
+              severity: 'low',
+              description: `Entity "${entity.name}" (IDEAL domain) has extreme closure (${entity.config.closure.toFixed(2)}) and scope (${entity.config.scope.toFixed(2)}). This may justify adding IDEAL as an A3 exception.`,
+              evidence: [{
+                entityId: entity.id,
+                entityName: entity.name,
+                metric: 'closure_scope_product',
+                value: entity.config.closure * entity.config.scope,
+                threshold: 0.81,
+                context: 'IDEAL entities may be natural A3 exceptions (mathematical necessity)',
+              }],
+              suggestedAction: {
+                type: 'axiom_review',
+                description: 'Consider adding IDEAL domain as formal A3 exception in AXIOMS.md',
+                parameters: {
+                  proposedException: 'A3 does not apply to IDEAL domain entities (mathematical objects are both fully autonomous and universally relevant by nature)',
+                  affectedEntities: entities.filter(e => e.domain === 'IDEAL' && e.config.closure > 0.8 && e.config.scope > 0.8).map(e => e.name),
+                },
+                confidence: 0.8,
+              },
+              detectedAt: new Date(),
+            });
+          }
+          // Skip normal A3 check for IDEAL entities
+          continue;
+        }
+
         gaps.push({
           id: this.generateGapId(),
           type: 'axiom_tension',
@@ -538,6 +586,58 @@ export class GapAnalyzer {
     if (closure < 0.3 && scope > 0.7) return 'DEPENDENT_EXTENSIVE';
     if (closure < 0.3 && scope < 0.3) return 'DEPENDENT_LOCAL';
     return 'HYBRID';
+  }
+
+  private suggestCrossCuttingDomain(
+    cluster: { entities: Entity[]; avgClosure: number; avgScope: number; coherence: number },
+    domains: Set<string>
+  ): string {
+    // Analyze the cluster to suggest a meaningful cross-cutting domain name
+    const domainsArray = Array.from(domains);
+
+    // Check for common patterns
+    const hasLiving = domainsArray.includes('LIVING');
+    const hasArtificial = domainsArray.includes('ARTIFICIAL');
+    const hasSentient = domainsArray.includes('SENTIENT');
+    const hasCollective = domainsArray.includes('COLLECTIVE');
+    const hasSymbolic = domainsArray.includes('SYMBOLIC');
+    const hasIdeal = domainsArray.includes('IDEAL');
+
+    // Hybrid bio-tech entities
+    if (hasLiving && hasArtificial) {
+      return 'HYBRID_BIOTECH';
+    }
+
+    // Socio-technical systems
+    if (hasCollective && hasArtificial) {
+      return 'SOCIOTECHNICAL';
+    }
+
+    // Cognitive-symbolic entities
+    if (hasSentient && hasSymbolic) {
+      return 'COGNITIVE';
+    }
+
+    // Autonomous agents (living or artificial)
+    if (cluster.avgClosure > 0.6 && (hasLiving || hasSentient || hasArtificial)) {
+      return 'AUTONOMOUS_AGENT';
+    }
+
+    // Distributed/network entities
+    if (cluster.avgScope > 0.6 && hasCollective) {
+      return 'NETWORKED';
+    }
+
+    // Mid-range autonomy entities
+    if (cluster.avgClosure > 0.4 && cluster.avgClosure < 0.7) {
+      if (cluster.avgScope > 0.5) {
+        return 'SEMI_AUTONOMOUS_EXTENSIVE';
+      }
+      return 'SEMI_AUTONOMOUS';
+    }
+
+    // Default based on closure/scope
+    return this.suggestDomainName(cluster.avgClosure, cluster.avgScope);
   }
 
   private extractBehaviorPatterns(entities: Entity[]): Array<{
