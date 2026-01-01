@@ -1,0 +1,30 @@
+{
+  "name": "atlas-ecf",
+  "version": "0.1.0",
+  "description": "Entity Characterization Framework (ECF) - A framework for characterizing any entity",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rossignoliluca/atlas"
+  },
+  "keywords": [
+    "ontology",
+    "entity",
+    "characterization",
+    "autopoiesis",
+    "philosophy",
+    "framework"
+  ],
+  "author": "Luca Rossignoli",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
