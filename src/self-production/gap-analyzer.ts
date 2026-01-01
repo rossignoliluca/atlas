@@ -410,42 +410,17 @@ export class GapAnalyzer {
 
     for (const entity of entities) {
       // A3: Closure-Scope tension
-      // EXCEPTION: IDEAL domain entities (mathematical objects) can have both high C and S
+      // FORMAL EXCEPTION: IDEAL domain entities are exempt from A3 (see AXIS/AXIOMS.md)
+      // Mathematical objects genuinely have both high C and S without tension
+      if (entity.domain === 'IDEAL') {
+        // A3 Exception applies - skip entirely, no flagging needed
+        // Rationale: IDEAL entities (numbers, logical laws, etc.) are necessary beings
+        // that don't maintain themselves against an environment - they simply ARE.
+        continue;
+      }
+
       if (entity.config.closure > 0.8 && entity.config.scope > 0.8) {
-        // Check if this is an IDEAL domain entity - they're special!
-        if (entity.domain === 'IDEAL') {
-          // Mathematical objects genuinely have both high closure AND high scope
-          // This is not a violation but a defining characteristic of IDEAL entities
-          // Suggest documenting this as an A3 exception
-          if (entity.config.closure > 0.9 && entity.config.scope > 0.9) {
-            gaps.push({
-              id: this.generateGapId(),
-              type: 'axiom_tension',
-              severity: 'low',
-              description: `Entity "${entity.name}" (IDEAL domain) has extreme closure (${entity.config.closure.toFixed(2)}) and scope (${entity.config.scope.toFixed(2)}). This may justify adding IDEAL as an A3 exception.`,
-              evidence: [{
-                entityId: entity.id,
-                entityName: entity.name,
-                metric: 'closure_scope_product',
-                value: entity.config.closure * entity.config.scope,
-                threshold: 0.81,
-                context: 'IDEAL entities may be natural A3 exceptions (mathematical necessity)',
-              }],
-              suggestedAction: {
-                type: 'axiom_review',
-                description: 'Consider adding IDEAL domain as formal A3 exception in AXIOMS.md',
-                parameters: {
-                  proposedException: 'A3 does not apply to IDEAL domain entities (mathematical objects are both fully autonomous and universally relevant by nature)',
-                  affectedEntities: entities.filter(e => e.domain === 'IDEAL' && e.config.closure > 0.8 && e.config.scope > 0.8).map(e => e.name),
-                },
-                confidence: 0.8,
-              },
-              detectedAt: new Date(),
-            });
-          }
-          // Skip normal A3 check for IDEAL entities
-          continue;
-        }
+        // Non-IDEAL entities with high C+S still create tension
 
         gaps.push({
           id: this.generateGapId(),

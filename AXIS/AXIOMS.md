@@ -41,6 +41,28 @@ These axioms form the irreducible foundation of the Entity Characterization Fram
 
 This is not a law but a tendency. Some entities achieve both through nested structure.
 
+### A3 Exception: IDEAL Domain
+
+> **A3 does not apply to IDEAL domain entities.**
+
+Mathematical and logical objects (numbers, sets, geometric forms, logical laws) genuinely possess both:
+- **High Closure (C ≈ 0.95-1.0)**: They are complete in themselves, require no external maintenance
+- **High Scope (S ≈ 0.95-1.0)**: They apply universally across all contexts, times, and possible worlds
+
+**Why no tension?**
+
+| Property | Empirical Entities | IDEAL Entities |
+|----------|-------------------|----------------|
+| Existence | Contingent | Necessary |
+| Maintenance | Requires energy/effort | Self-subsistent |
+| Scope | Trade-off with closure | Universal by nature |
+
+IDEAL entities don't *maintain* themselves against an environment—they simply *are*. The number 7 doesn't expend effort to remain 7. Its universality (scope) doesn't threaten its identity (closure) because it has no boundary to defend.
+
+**Philosophical grounding**: This aligns with mathematical Platonism—abstract objects exist in all possible worlds, making them both maximally closed (nothing can change them) and maximally scoped (they apply everywhere).
+
+*Added via Self-Production Engine based on axiom tension detected in Number, Logical Law, Set, Geometric Form entities.*
+
 ---
 
 ## A4: Stratal Nesting
