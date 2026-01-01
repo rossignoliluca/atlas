@@ -1,11 +1,16 @@
 {
   "name": "atlas-ecf",
-  "version": "0.1.0",
-  "description": "Entity Characterization Framework (ECF) - A framework for characterizing any entity",
+  "version": "0.2.0",
+  "description": "Entity Characterization Framework (ECF) - An autopoietic framework for characterizing any entity",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "atlas": "./dist/cli.js"
+  },
   "scripts": {
     "build": "tsc",
+    "start": "npx ts-node src/cli.ts",
+    "atlas": "npx ts-node src/cli.ts",
     "test": "jest",
     "lint": "eslint src"
   },
